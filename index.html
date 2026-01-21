@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Survei Arpus Pekalongan</title>
+    <style>
+        :root { --biru: #003d7a; --langit: #007bff; --hijau: #28a745; --abu: #f8f9fa; --text: #333; }
+        
+        body { font-family: 'Segoe UI', sans-serif; background: #cbdcf7; margin: 0; min-height: 100vh; padding: 20px; display: flex; justify-content: center; color: var(--text); }
+
+        .container { background: white; width: 95%; max-width: 1400px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); overflow: hidden; position: relative; }
+        
+        /* HEADER - DINAS ARPUS BESAR */
+        .header { background: linear-gradient(135deg, var(--biru), var(--langit)); padding: 20px 40px; display: flex; align-items: center; color: white; gap: 20px; }
+        .header img { width: 50px; height: auto; } /* Ukuran Logo Header */
+        .header .title-area { display: flex; flex-direction: column; }
+        .header h1 { margin: 0; font-size: 32px; line-height: 1; text-transform: uppercase; }
+        .header h2 { margin: 5px 0 0 0; font-size: 16px; font-weight: 300; }
+
+        .step { display: none; padding: 50px; }
+        .active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* WELCOME SPLIT - Ukuran Gambar Diatur Di Sini */
+        .welcome-split { display: flex; align-items: center; gap: 50px; }
+        .welcome-img { flex: 1; text-align: center; }
+        .welcome-img img { width: 70%; max-width: 400px; border-radius: 15px; } /* Ukuran gambar orang membaca */
+        .welcome-text { flex: 1; }
+
+        /* FORM BIODATA */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 50px; max-width: 1100px; margin: 0 auto; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--biru); }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
+
+        /* KUESIONER */
+        .q-box { display: none; text-align: center; max-width: 850px; margin: 0 auto; }
+        .q-box.q-active { display: block; }
+        .emoji-grid { display: flex; justify-content: space-around; gap: 20px; margin: 40px 0; }
+        .emoji-item { flex: 1; padding: 25px; border: 2px solid #eee; border-radius: 20px; cursor: pointer; transition: 0.3s; background: #fff; }
+        .emoji-item span { font-size: 50px; display: block; }
+        .emoji-item.selected { border-color: var(--hijau); background: #f0fff4; transform: scale(1.05); }
+
+        /* TOMBOL */
+        .btn-group { display: flex; justify-content: center; gap: 15px; margin-top: 40px; }
+        .btn { background: var(--langit); color: white; border: none; padding: 18px 45px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .btn:hover { background: var(--biru); transform: translateY(-2px); }
+        .btn-back { background: #e2e8f0; color: #4a5568; }
+
+        /* LOGO TAMBAHAN DI BAWAH TOMBOL */
+        .extra-logos { margin-top: 40px; display: flex; gap: 40px; align-items: center; }
+        .extra-logos img { height: 80px; width: auto; opacity: 50; }
+        .extra-logos img { height: 100px; width: auto; opacity: 100; }
+
+
+        /* MODAL & SUCCESS */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 40px; border-radius: 15px; text-align: center; max-width: 450px; width: 90%; }
+        .success-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; flex-direction: column; justify-content: center; align-items: center; }
+        .checkmark-circle { width: 120px; height: 120px; border-radius: 50%; background: var(--hijau); display: flex; justify-content: center; align-items: center; margin-bottom: 20px; animation: scaleUp 0.5s ease; }
+        .checkmark-icon { color: white; font-size: 70px; font-weight: bold; }
+        @keyframes scaleUp { from { transform: scale(0); } to { transform: scale(1); } }
+
+        /* REKAP & ADMIN TABLE */
+        .card-indeks { background: var(--hijau); color: white; padding: 30px; border-radius: 20px; max-width: 400px; margin: 20px auto; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .card-indeks div { font-size: 55px; font-weight: 800; }
+        .table-container { overflow-x: auto; margin-top: 30px; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; background: white; }
+        th { background: var(--biru); color: white; padding: 15px; font-size: 13px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; text-align: center; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <img src="dinas.PNG" alt="Logo"> <div class="title-area">
+            <h1>DINAS ARPUS</h1>
+            <h2>Kabupaten Pekalongan</h2>
+        </div>
+    </div>
+
+    <div id="p1" class="step active">
+        <div class="welcome-split">
+            <div class="welcome-img">
+                <img src="gambar.png" alt="Library Illustration">
+            </div>
+            <div class="welcome-text">
+                <h2 style="font-size: 42px; color: var(--biru); margin-bottom: 15px;">E-Survei Kepuasan Masyarakat</h2>
+                <p style="font-size: 19px; color: #666; margin-bottom: 35px;">Wujudkan pelayanan publik yang lebih baik bersama 
+                    Dinas Kearsipan dan Perpustakaan Kabupaten Pekalongan dengan memberikan penilaian Anda.</p>
+                <div class="btn-group" style="justify-content: flex-start;">
+                    <button class="btn" onclick="go(2)">MULAI SURVEI</button>
+                    <button class="btn btn-back" onclick="goRekap()">CEK LAPORAN</button>
+                </div>
+                <div class="extra-logos">
+                    <img src="bangga.png" alt="Logo 1">  <img src="berakhlaq.png" alt="Logo 1"> </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="p2" class="step">
+        <h2 style="text-align: center; margin-bottom: 30px;">BIOATA RESPONDED</h2>
+        <div class="form-grid">
+            <div class="form-group"><label>Nama Lengkap</label><input type="text" id="nama"></div>
+            <div class="form-group"><label>Jenis Kelamin</label><select id="jk"><option value="">-- Pilih --</option><option value="L">Laki-laki</option><option value="P">Perempuan</option></select></div>
+            <div class="form-group"><label>Usia</label><input type="number" id="usia"></div>
+            <div class="form-group"><label>Nomor Aktif (WA)</label><input type="number" id="WA" placeholder="08xxxxxxxxxx" required></div>
+            <div class="form-group"><label>Pendidikan</label><select id="pendidikan"><option value="">-- Pilih --</option><option value="SD/SMP">SD/SMP</option><option value="SMA/SMK">SMA/SMK</option><option value="Sarjana">Sarjana/Diploma</option></select></div>
+            <div class="form-group"><label>Pekerjaan</label><select id="pekerjaan"><option value="">-- Pilih --</option><option value="PNS">PNS</option><option value="TNI">TNI</option><option value="Swasta">Swasta</option><option value="Wirausaha">Wirausaha</option><option value="Lainnya">Lainnya</option></select></div>
+            <div class="form-group"><label>Kecamatan</label>
+                <select id="kec">
+                    <option value="">-- Pilih --</option>
+                    <option value="Kajen">Kajen</option><option value="Kesesi">Kesesi</option><option value="Sragi">Sragi</option><option value="Bojong">Bojong</option><option value="Wonopringgo">Wonopringgo</option><option value="Kedungwuni">Kedungwuni</option><option value="Buaran">Buaran</option><option value="Tirto">Tirto</option><option value="Wiradesa">Wiradesa</option><option value="Siwalan">Siwalan</option><option value="Wonokerto">Wonokerto</option><option value="Karangdadap">Karangdadap</option><option value="Talun">Talun</option><option value="Doro">Doro</option><option value="Karanganyar">Karanganyar</option><option value="Lebakbarang">Lebakbarang</option><option value="Paninggaran">Paninggaran</option><option value="Kandangserang">Kandangserang</option><option value="Petungkriyono">Petungkriyono</option>
+                </select>
+            </div>
+            <div class="form-group" style="grid-column: span 2;"><label>Jenis Layanan</label>
+                <select id="layanan">
+                    <option value="">-- Pilih Layanan --</option>
+                    <option value="Informasi Arsip">Layanan Informasi Arsip</option>
+                    <option value="Peminjaman Arsip">Layanan Peminjaman Arsip</option>
+                    <option value="Konsultasi Kearsipan">Layanan Konsultasi Kearsipan</option>
+                    <option value="Fasilitas Kearsipan">Layanan Fasilitas Kearsipan</option>
+                    <option value="Layanan Pengaduan">Layanan Pengaduan</option>
+                </select>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-back" onclick="go(1)">KEMBALI</button>
+            <button class="btn" onclick="validasiBiodata()">LANJUT KE PENILAIAN</button>
+        </div>
+    </div>
+
+    <div id="p3" class="step">
+        <h2 style="text-align:center;">Kuesioner Tahun <span id="thnKues"></span></h2>
+        
+        <div id="stepQ1" class="q-box q-active">
+            <h3>1. Bagaimana Kenyamanan & Kebersihan ruang pelayanan?</h3>
+            <div class="emoji-grid" id="q1">
+                <div class="emoji-item" onclick="pilih(this, 'q1', 100)"><span>😍</span><b>Sangat Baik</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q1', 75)"><span>😊</span><b>Baik</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q1', 50)"><span>😐</span><b>Cukup</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q1', 25)"><span>☹️</span><b>Buruk</b></div>
+            </div>
+            <button class="btn" onclick="nextQ(2)">SELANJUTNYA</button>
+        </div>
+
+        <div id="stepQ2" class="q-box">
+            <h3>2. Bagaimana Sikap & Keramahan petugas?</h3>
+            <div class="emoji-grid" id="q2">
+                <div class="emoji-item" onclick="pilih(this, 'q2', 100)"><span>😍</span><b>Sangat Baik</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q2', 75)"><span>😊</span><b>Baik</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q2', 50)"><span>😐</span><b>Cukup</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q2', 25)"><span>☹️</span><b>Buruk</b></div>
+            </div>
+            <button class="btn" onclick="nextQ(3)">SELANJUTNYA</button>
+        </div>
+
+        <div id="stepQ3" class="q-box">
+            <h3>3. Bagaimana Kecepatan layanan kami?</h3>
+            <div class="emoji-grid" id="q3">
+                <div class="emoji-item" onclick="pilih(this, 'q3', 100)"><span>😍</span><b>Sangat Baik</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q3', 75)"><span>😊</span><b>Baik</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q3', 50)"><span>😐</span><b>Cukup</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q3', 25)"><span>☹️</span><b>Buruk</b></div>
+            </div>
+            <button class="btn" onclick="nextQ(4)">SELANJUTNYA</button>
+        </div>
+
+        <div id="stepQ4" class="q-box">
+            <h3>4. Bagaimana Kemudahan Prosedur layanan kami?</h3>
+            <div class="emoji-grid" id="q4">
+                <div class="emoji-item" onclick="pilih(this, 'q4', 100)"><span>😍</span><b>Sangat Baik</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q4', 75)"><span>😊</span><b>Baik</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q4', 50)"><span>😐</span><b>Cukup</b></div>
+                <div class="emoji-item" onclick="pilih(this, 'q4', 25)"><span>☹️</span><b>Buruk</b></div>
+            </div>
+            <button class="btn" onclick="konfirmasiSimpan()" style="background:var(--hijau)">KIRIM PENILAIAN</button>
+        </div>
+    </div>
+
+    <div id="pRekap" class="step">
+        <h2 style="text-align:center;">Laporan Indeks Kepuasan</h2>
+        <div style="text-align:center; margin-bottom:20px;">
+            Filter Tahun: <select id="fTahun" onchange="renderRekap()" style="width:120px;"></select>
+        </div>
+        <div class="card-indeks"><small>IKM RATA-RATA</small><div id="rAvg">0%</div></div>
+        
+        <div id="adminArea" style="display:none;">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Nama</th><th>JK</th><th>WA</th><th>Pekerjaan</th><th>Kecamatan</th><th>Layanan</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Skor</th><th>Aksi</th></tr>
+                    </thead>
+                    <tbody id="tBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-back" onclick="go(1)">KEMBALI KE BERANDA</button>
+            <button id="btnLogin" class="btn" onclick="loginAdmin()">ADMIN LOGIN</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalKonfirmasi" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="color:var(--biru); margin-top:0;">Konfirmasi</h2>
+        <p style="font-size:18px;">Apakah Anda sudah yakin dengan jawabannya?</p>
+        <div class="btn-group">
+            <button class="btn btn-back" onclick="tutupModal()">BELUM</button>
+            <button class="btn" style="background:var(--hijau);" onclick="prosesSimpan()">YA, SUDAH YAKIN</button>
+        </div>
+    </div>
+</div>
+
+<div id="successOverlay" class="success-overlay">
+    <div class="checkmark-circle"><div class="checkmark-icon">✓</div></div>
+    <h1 style="color:var(--hijau); margin:0;">Terima Kasih!</h1>
+    <p style="font-size:18px; color:#666;">Data Anda telah berhasil disimpan.</p>
+</div>
+
+<script>
+    let skor = { q1: 0, q2: 0, q3: 0, q4: 0 };
+    const TAHUN_INI = new Date().getFullYear();
+    let isAdmin = false;
+    const urlScript ="https://script.google.com/macros/s/AKfycbycN04v3Nyot_acUM1hox85irsq5MM1K6g6RCBzF6sqGyCjrVhmpTUDMOS0dpyIb52S/exec";
+
+    window.onload = function() {
+        document.getElementById('thnKues').innerText = TAHUN_INI;
+        let st = document.getElementById('fTahun');
+        for (let i = TAHUN_INI; i >= TAHUN_INI - 2; i--) {
+            let o = document.createElement('option'); o.value = i; o.innerText = i; st.appendChild(o);
+        }
+    }
+
+    function go(s) {
+        document.querySelectorAll('.step').forEach(d => d.classList.remove('active'));
+        if(s === 'Rekap') document.getElementById('pRekap').classList.add('active');
+        else document.getElementById('p' + s).classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function validasiBiodata() {
+        const fields = ['nama', 'jk','WA' ,'usia', 'pendidikan', 'pekerjaan', 'kec', 'layanan'];
+        for(let f of fields) { if(document.getElementById(f).value === "") return alert("Mohon lengkapi seluruh data!"); }
+        go(3);
+    }
+
+    function nextQ(n) {
+        if(!skor['q'+(n-1)]) return alert("Pilih salah satu emoji!");
+        document.querySelectorAll('.q-box').forEach(q => q.classList.remove('q-active'));
+        document.getElementById('stepQ' + n).classList.add('q-active');
+    }
+
+    function pilih(el, g, v) {
+        skor[g] = v;
+        document.querySelectorAll('#' + g + ' .emoji-item').forEach(i => i.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function konfirmasiSimpan() {
+        if(!skor.q4) return alert("Pilih penilaian terakhir!");
+        document.getElementById('modalKonfirmasi').style.display = 'flex';
+    }
+
+    function tutupModal() { document.getElementById('modalKonfirmasi').style.display = 'none'; }
+
+    function prosesSimpan() {
+        tutupModal();
+        document.getElementById('successOverlay').style.display = 'flex';
+        
+        let db = JSON.parse(localStorage.getItem('dbArpusResmi')) || [];
+            db.push({
+    id: Date.now(),
+    n: document.getElementById('nama').value,
+    j: document.getElementById('jk').value,
+    w: document.getElementById('WA').value,        // Gunakan 'w' untuk WA (pastikan ID di HTML adalah 'WA')
+    p: document.getElementById('pekerjaan').value, // Gunakan 'p' untuk Pekerjaan
+    k: document.getElementById('kec').value,
+    l: document.getElementById('layanan').value,
+    y: TAHUN_INI,
+    s1: skor.q1, s2: skor.q2, s3: skor.q3, s4: skor.q4
+});
+    fetch(urlScript, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: JSON.stringify(db[db.length - 1])
+    })
+    .then(() => console.log("Berhasil terkirim!"))
+    .catch(e => console.error("Gagal!", e));
+        localStorage.setItem('dbArpusResmi', JSON.stringify(db));
+        setTimeout(() => { location.reload(); }, 3000);
+    }
+
+    function goRekap() { go('Rekap'); renderRekap(); }
+
+    function loginAdmin() {
+        let pass = prompt("Masukkan Password Admin:");
+        if(pass === "adminarpus") {
+            isAdmin = true;
+            document.getElementById('adminArea').style.display = 'block';
+            document.getElementById('btnLogin').style.display = 'none';
+            renderRekap();
+        } else if(pass !== null) {
+            alert("Password salah!");
+        }
+    }
+
+    function renderRekap() {
+        let db = JSON.parse(localStorage.getItem('dbArpusResmi')) || [];
+        let filter = document.getElementById('fTahun').value;
+        let filtered = db.filter(i => i.y == filter);
+        let body = document.getElementById('tBody');
+        let totalAll = 0; body.innerHTML = "";
+
+        filtered.forEach((i) => {
+            let avg = Math.round((i.s1 + i.s2 + i.s3 + i.s4) / 4);
+            totalAll += avg;
+            if(isAdmin) {
+                body.innerHTML += `<tr><td>${i.n}</td><td>${i.j}</td><td>${i.w}</td><td>${i.p}</td><td>${i.k}</td><td>${i.l}</td><td>${i.s1}%</td><td>${i.s2}%</td><td>${i.s3}%</td><td>${i.s4}%</td><td><b>${avg}%</b></td><td><button onclick="hapus(${i.id})">🗑️</button></td></tr>`;
+            }
+        });
+        document.getElementById('rAvg').innerText = (filtered.length > 0 ? Math.round(totalAll / filtered.length) : 0) + "%";
+    }
+
+    function hapus(id) {
+        if(confirm("Hapus data responden ini?")) {
+            let db = JSON.parse(localStorage.getItem('dbArpusResmi')) || [];
+            localStorage.setItem('dbArpusResmi', JSON.stringify(db.filter(i => i.id !== id)));
+            renderRekap();
+        }
+    }
+</script>
+</body>
+</html>
